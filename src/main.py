@@ -1,7 +1,7 @@
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
 import gensim
-from models import *
+from src.models import *
 import random
 
 
