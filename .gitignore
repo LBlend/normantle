@@ -1,0 +1,6 @@
+model/
+
+build/
+dist/
+__pycache__/
+normantle.egg-info
