@@ -73,3 +73,15 @@ async def guess(guess: Guess) -> GuessReult:
     return await calculate_guess(guess)
 
 
+@app.post("/hint", response_model=GuessReult)
+async def hint(hint: Hint) -> GuessReult:
+    """
+    Return a word that is closer to the solution than the current best guess
+    """
+
+    closer = model.closer_than(model.index_to_key[hint.puzzleNumber], hint.bestGuess)
+    hint_word = random.choice(closer)
+
+    return await calculate_guess(Guess(word=hint_word, puzzleNumber=hint.puzzleNumber))
+
+
