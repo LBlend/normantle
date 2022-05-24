@@ -85,3 +85,10 @@ async def hint(hint: Hint) -> GuessReult:
     return await calculate_guess(Guess(word=hint_word, puzzleNumber=hint.puzzleNumber))
 
 
+@app.get("/surrender", response_model=GuessReult)
+async def surrender(puzzle: int) -> GuessReult:
+    """
+    Return the correct word as a guess result
+    """
+
+    return GuessReult(word=model.index_to_key[puzzle], similarity=1, isClose=True, isCorrect=True)
