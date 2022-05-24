@@ -61,3 +61,15 @@ async def today_info() -> TodayInfo:
     )
 
 
+# POST requests below because it's much more convinient to define a type than to use query parameters
+
+
+@app.post("/guess", response_model=GuessReult)
+async def guess(guess: Guess) -> GuessReult:
+    """
+    Submit a guess and get the result
+    """
+
+    return await calculate_guess(guess)
+
+
