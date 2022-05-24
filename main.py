@@ -23,3 +23,25 @@ top_10_similarity = top_1000[10 - 1][1]
 top_1000_similarity = top_1000[1000 - 1][1]
 
 
+
+async def calculate_guess(guess: Guess) -> GuessReult:
+    """
+    Takes a given guess and calculates the similarity, correctness and closeness of the guess
+    """
+
+    try:
+        similarity = model.similarity(guess.word, model.index_to_key[guess.puzzleNumber])
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Word not found")
+
+    is_correct = similarity > 0.9
+
+    if guess.puzzleNumber != puzzle_number:  # If user is still submitting for yesterday's puzzle. Still respond
+        top_1000 = model.most_similar(model.index_to_key[guess.puzzleNumber], topn=1000)
+        top_1000_words = map(lambda x: x[0], top_1000)
+
+    is_close = True if guess.word in top_1000_words else False
+
+    return GuessReult(word=guess.word, similarity=similarity, isClose=is_close, isCorrect=is_correct)
+
+
