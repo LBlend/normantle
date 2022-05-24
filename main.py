@@ -23,6 +23,8 @@ top_10_similarity = top_1000[10 - 1][1]
 top_1000_similarity = top_1000[1000 - 1][1]
 
 
+app = FastAPI()
+
 
 async def calculate_guess(guess: Guess) -> GuessReult:
     """
@@ -43,5 +45,19 @@ async def calculate_guess(guess: Guess) -> GuessReult:
     is_close = True if guess.word in top_1000_words else False
 
     return GuessReult(word=guess.word, similarity=similarity, isClose=is_close, isCorrect=is_correct)
+
+
+@app.get("/today", response_model=TodayInfo)
+async def today_info() -> TodayInfo:
+    """
+    Metadata about today's puzzle
+    """
+
+    return TodayInfo(
+        puzzleNumber=puzzle_number,
+        similarity=top_1_similarity,
+        similarityTenth=top_10_similarity,
+        similarityThousandth=top_1000_similarity,
+    )
 
 
