@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class TodayInfo(BaseModel):
     puzzleNumber: int
-    similarity: int
+    similarity: float
     similarityTenth: float
     similarityThousandth: float
 
