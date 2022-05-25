@@ -1,5 +1,6 @@
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import gensim
 from src.models import *
 import random
@@ -24,6 +25,8 @@ top_1000_similarity = top_1000[1000 - 1][1]
 
 
 app = FastAPI()
+
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"])
 
 
 async def calculate_guess(guess: Guess) -> GuessReult:
