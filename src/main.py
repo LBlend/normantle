@@ -100,4 +100,4 @@ async def surrender(puzzle: int) -> GuessReult:
     Return the correct word as a guess result
     """
 
-    return GuessReult(word=model.index_to_key[puzzle], similarity=1, isClose=True, isCorrect=True)
+    return GuessReult(word=model.index_to_key[puzzle], similarity=1, isClose=True, isCorrect=True, of_thousand=0)
