@@ -49,8 +49,11 @@ async def calculate_guess(guess: Guess) -> GuessReult:
         top_1000_words = app.top_1000_words
 
     is_close = True if guess.word in top_1000_words else False
+    closeness = top_1000_words.index(guess.word) + 1 if is_close else None
 
-    return GuessReult(word=guess.word, similarity=similarity, isClose=is_close, isCorrect=is_correct)
+    return GuessReult(
+        word=guess.word, similarity=similarity, isClose=is_close, isCorrect=is_correct, of_thousand=closeness
+    )
 
 
 @app.get("/today", response_model=TodayInfo)
