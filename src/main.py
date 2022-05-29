@@ -10,6 +10,8 @@ print("Loading model... This might take a while!")
 model = gensim.models.KeyedVectors.load_word2vec_format("model/model.bin", binary=True, unicode_errors="replace")
 print("Model loaded!")
 
+model.sort_by_descending_frequency()  # Just in case :)
+
 
 # TODO: Run this on a cronjob at midnight
 # Set seed to current day in order to generate same word when running on the same day
