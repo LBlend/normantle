@@ -9,3 +9,8 @@ if [ ! -d 'model' ]; then
     unzip 76.zip -d model
     rm 76.zip
 fi
+
+if [ ! -f 'model/new_model.txt' ]; then
+    echo "Filtering model..."
+    python3 scripts/filter_model.py
+fi
