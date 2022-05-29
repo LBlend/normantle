@@ -16,19 +16,18 @@ model.sort_by_descending_frequency()  # Just in case :)
 # TODO: Run this on a cronjob at midnight
 # Set seed to current day in order to generate same word when running on the same day
 random.seed(datetime.now().strftime("%Y-%m-%d"))
-# Fetch info
-puzzle_number = random.randint(0, 5000)  # Only fetch words from the first 5000 to avoid obscure words
-current_word = model.index_to_key[puzzle_number]
-top_1000 = model.most_similar(current_word, topn=1000)
-top_1000_words = map(lambda x: x[0], top_1000)
-top_1_similarity = top_1000[0][1]
-top_10_similarity = top_1000[10 - 1][1]
-top_1000_similarity = top_1000[1000 - 1][1]
-
 
 app = FastAPI()
-
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"])
+
+# Fetch info
+app.puzzle_number = random.randint(0, 5000)  # Only fetch words from the first 5000 to avoid obscure words
+app.current_word = model.index_to_key[app.puzzle_number]
+app.top_1000 = model.most_similar(app.current_word, topn=1000)
+app.top_1000_words = list(map(lambda x: x[0], app.top_1000))
+app.top_1_similarity = app.top_1000[0][1]
+app.top_10_similarity = app.top_1000[10 - 1][1]
+app.top_1000_similarity = app.top_1000[1000 - 1][1]
 
 
 async def calculate_guess(guess: Guess) -> GuessReult:
@@ -43,9 +42,11 @@ async def calculate_guess(guess: Guess) -> GuessReult:
 
     is_correct = similarity > 0.9
 
-    if guess.puzzleNumber != puzzle_number:  # If user is still submitting for yesterday's puzzle. Still respond
+    if guess.puzzleNumber != app.puzzle_number:  # If user is still submitting for yesterday's puzzle. Still respond
         top_1000 = model.most_similar(model.index_to_key[guess.puzzleNumber], topn=1000)
-        top_1000_words = map(lambda x: x[0], top_1000)
+        top_1000_words = list(map(lambda x: x[0], top_1000))
+    else:
+        top_1000_words = app.top_1000_words
 
     is_close = True if guess.word in top_1000_words else False
 
@@ -59,10 +60,10 @@ async def today_info() -> TodayInfo:
     """
 
     return TodayInfo(
-        puzzleNumber=puzzle_number,
-        similarity=top_1_similarity,
-        similarityTenth=top_10_similarity,
-        similarityThousandth=top_1000_similarity,
+        puzzleNumber=app.puzzle_number,
+        similarity=app.top_1_similarity,
+        similarityTenth=app.top_10_similarity,
+        similarityThousandth=app.top_1000_similarity,
     )
 
 
