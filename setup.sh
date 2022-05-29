@@ -7,4 +7,5 @@ if [ ! -d 'model' ]; then
     echo "Downloading word embeddings..."
     wget http://vectors.nlpl.eu/repository/20/76.zip
     unzip 76.zip -d model
+    rm 76.zip
 fi
