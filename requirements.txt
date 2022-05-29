@@ -1,0 +1,4 @@
+fastapi
+gensim
+uvicorn[standard]
+nltk

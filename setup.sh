@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "Installing Python dependencies..."
-python3 setup.py install
+python3 -m pip install -r requirements.txt -U
 
 if [ ! -d 'model' ]; then
     echo "Downloading word embeddings..."
