@@ -52,7 +52,7 @@ async def calculate_guess(guess: Guess) -> GuessReult:
     closeness = top_1000_words.index(guess.word) + 1 if is_close else None
 
     return GuessReult(
-        word=guess.word, similarity=similarity, isClose=is_close, isCorrect=is_correct, of_thousand=closeness
+        word=guess.word, similarity=similarity, isClose=is_close, isCorrect=is_correct, ofThousand=closeness
     )
 
 
@@ -100,4 +100,4 @@ async def surrender(puzzle: int) -> GuessReult:
     Return the correct word as a guess result
     """
 
-    return GuessReult(word=model.index_to_key[puzzle], similarity=1, isClose=True, isCorrect=True, of_thousand=0)
+    return GuessReult(word=model.index_to_key[puzzle], similarity=1, isClose=True, isCorrect=True, ofThousand=0)

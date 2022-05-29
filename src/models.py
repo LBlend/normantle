@@ -18,7 +18,7 @@ class GuessReult(BaseModel):
     similarity: float
     isClose: bool
     isCorrect: bool
-    of_thousand: int | None = None
+    ofThousand: int | None = None
 
 
 class Hint(BaseModel):
