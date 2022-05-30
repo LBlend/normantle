@@ -1,4 +1,5 @@
 fastapi
+fastapi-utils
 gensim
 uvicorn[standard]
 nltk

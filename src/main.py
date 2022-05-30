@@ -2,6 +2,7 @@ from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
+from fastapi_utils.tasks import repeat_every
 import gensim
 from src.models import Guess, GuessReult, Hint, TodayInfo
 import random
@@ -13,22 +14,32 @@ print("Model loaded!")
 
 model.sort_by_descending_frequency()  # Just in case :)
 
-
-# TODO: Run this on a cronjob at midnight
-# Set seed to current day in order to generate same word when running on the same day
-random.seed(datetime.now().strftime("%Y-%m-%d"))
-
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"])
+app.current_day = None
 
-# Fetch info
-app.puzzle_number = random.randint(0, 5000)  # Only fetch words from the first 5000 to avoid obscure words
-app.current_word = model.index_to_key[app.puzzle_number]
-app.top_1000 = model.most_similar(app.current_word, topn=1000)
-app.top_1000_words = list(map(lambda x: x[0], app.top_1000))
-app.top_1_similarity = app.top_1000[0][1]
-app.top_10_similarity = app.top_1000[10 - 1][1]
-app.top_1000_similarity = app.top_1000[1000 - 1][1]
+
+@app.on_event("startup")
+@repeat_every(seconds=30)  # This is not an optimal way of doing this but it will have to work for now
+def fetch_today_info():  # Set seed to current day in order to generate same word when running on the same day
+    current_day = datetime.now().strftime("%Y-%m-%d")
+    if current_day == app.current_day:
+        return
+
+    app.current_day = current_day
+
+    print("Fetching new todayinfo", app.current_day)
+
+    random.seed(app.current_day)
+
+    # Fetch info
+    app.puzzle_number = random.randint(0, 5000)  # Only fetch words from the first 5000 to avoid obscure words
+    app.current_word = model.index_to_key[app.puzzle_number]
+    app.top_1000 = model.most_similar(app.current_word, topn=1000)
+    app.top_1000_words = list(map(lambda x: x[0], app.top_1000))
+    app.top_1_similarity = app.top_1000[0][1]
+    app.top_10_similarity = app.top_1000[10 - 1][1]
+    app.top_1000_similarity = app.top_1000[1000 - 1][1]
 
 
 async def calculate_guess(guess: Guess) -> GuessReult:
