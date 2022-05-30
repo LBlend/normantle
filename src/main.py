@@ -126,11 +126,11 @@ async def top1000(puzzle: int):
     if puzzle != app.puzzle_number:  # If user is still submitting for yesterday's puzzle. Still respond
         top_1000 = model.most_similar(model.index_to_key[puzzle], topn=1000)
     else:
-        top_1000 = app.top_1000_words
+        top_1000 = app.top_1000
 
     top_1000 = list(
         map(
-            lambda x: f"<p>{x} {model.similarity(model.index_to_key[puzzle], x)}</p>",
+            lambda x: f"<p>{x[0]} {model.similarity(model.index_to_key[puzzle], x[0])}</p>",
             top_1000,
         )
     )
