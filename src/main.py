@@ -51,6 +51,8 @@ async def calculate_guess(guess: Guess) -> GuessReult:
     is_close = True if guess.word in top_1000_words else False
     closeness = top_1000_words.index(guess.word) + 1 if is_close else None
 
+    is_close = True if is_correct else is_close  # Set is_close to True if the guess is correct
+
     return GuessReult(
         word=guess.word, similarity=similarity, isClose=is_close, isCorrect=is_correct, ofThousand=closeness
     )
