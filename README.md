@@ -23,7 +23,7 @@ Kommer en eller annen gang™
 - Python 3.10+
 - Pip
 
-1. Kjør installasjon- og treningssskriptet
+1. Kjør installasjonsskriptet
 
    ```
    sh setup.sh
