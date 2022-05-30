@@ -48,3 +48,6 @@ Dette prosjektet tar i modell #93 fra LTG Oslo sitt [word embeddings repository]
 
 Modellene inneholder mange ord som ikke passer seg til spillet. Dette er gjerne stopwords eller andre ord som forkortelser osv. For å "løse" dette har jeg valgt å filtrere bort alle ord som er stoppord ifølge NLTK-pakken samt ord som inneholder store bokstaver eller er kortere enn tre bokstaver lange.
 
+## Takk
+
+Takk til [LtgOslo](https://www.mn.uio.no/ifi/english/research/groups/ltg/) som har publisert word2vec-modellen. Uten dem ville ikke dette prosjektet vært mulig.
