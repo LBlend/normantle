@@ -40,7 +40,7 @@ if __name__ == "__main__":
         print("Done\n")
 
     # 50K vectors per process totaling to 81 processes for the model consisting of a little over 4 million vectors
-    file_ranges = [(file_content[(i - 1) * 50_000 : i * 50_000], i) for i in range(2, 81)]
+    file_ranges = [(file_content[(i - 1) * 50_000:i * 50_000], i) for i in range(2, 81)]
     file_ranges.append((file_content[1:50_000], 1))
 
     with multiprocessing.Pool() as pool:

@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import gensim
-from src.models import *
+from src.models import Guess, GuessReult, Hint, TodayInfo
 import random
 
 
