@@ -24,3 +24,7 @@ class TodayInfo(BaseModel):
     similarity: float
     similarityTenth: float
     similarityThousandth: float
+
+
+class Top1000(BaseModel):
+    top1000: list[tuple[str, float]]

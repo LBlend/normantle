@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import gensim
-from src.models import Guess, GuessReult, Hint, TodayInfo
+from src.models import Guess, GuessReult, Hint, TodayInfo, Top1000
 import random
 
 
@@ -103,3 +103,19 @@ async def surrender(puzzle: int) -> GuessReult:
     """
 
     return GuessReult(word=model.index_to_key[puzzle], similarity=1, isClose=True, isCorrect=True, ofThousand=0)
+
+
+@app.get("/top1000", response_model=Top1000)
+async def top1000(puzzle: int) -> Top1000:
+    """
+    Return the top 1000 closes words and their similarity for a given puzzle
+    """
+
+    if puzzle != app.puzzle_number:  # If user is still submitting for yesterday's puzzle. Still respond
+        top_1000 = model.most_similar(model.index_to_key[puzzle], topn=1000)
+    else:
+        top_1000 = app.top_1000_words
+
+    top_1000 = list(map(lambda x: (x, model.similarity(model.index_to_key[puzzle], x)), top_1000))
+
+    return Top1000(top1000=top_1000)
