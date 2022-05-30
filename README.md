@@ -37,3 +37,14 @@ _Merk deg at dette skriptet antar at PATH til python er satt til `python3`. Hvis
    ```
 
 </details>
+
+## Et notat om valg av word2vec-modell og filtrering
+
+### Valg av modell
+
+Dette prosjektet tar i modell #93 fra LTG Oslo sitt [word embeddings repository](http://vectors.nlpl.eu/repository/). Grunnen til at denne modellen ble valgt over f.eks. en med større vokabulær har mye med de underliggende korpora. Etter litt anekdotisk eksperimentering kom det frem at modellene som tar i bruk NoWaC og NBDigital korpusene inneholdt mange ord som ikke er norske. Dette påvirket spillets gang til en såpass stor grad at disse ble valgt bort.
+
+### Filtrering
+
+Modellene inneholder mange ord som ikke passer seg til spillet. Dette er gjerne stopwords eller andre ord som forkortelser osv. For å "løse" dette har jeg valgt å filtrere bort alle ord som er stoppord ifølge NLTK-pakken samt ord som inneholder store bokstaver eller er kortere enn tre bokstaver lange.
+
