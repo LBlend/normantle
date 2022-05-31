@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  backend:
+    container_name: normantle-backend
+    image: "ghcr.io/lblend/normantle:latest"
+    ports:
+      - "5000:5000"
+
+  frontend:
+    container_name: normantle-frontend
+    image: "ghcr.io/lblend/normantle-frontend:latest"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
