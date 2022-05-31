@@ -11,7 +11,13 @@ _Dette repoet er backenden for prosjektet. Frontenden kan du finner [her](https:
 <details>
   <summary>Docker</summary>
 
-Kommer en eller annen gang™
+1. Skriv denne kommandoen for å kjøre backenden.
+
+```
+docker run -d -p 5000:5000 --name normantle-backend ghcr.io/lblend/normantle:latest
+```
+
+Vi anbefaler at du bruker kommandoen gitt ovenfor. Du står derimot fritt til å endre variabler til eget ønske om du vet hva du driver med.
 
 </details>
 
