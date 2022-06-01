@@ -33,7 +33,7 @@ def fetch_today_info():  # Set seed to current day in order to generate same wor
     random.seed(app.current_day)
 
     # Fetch info
-    app.puzzle_number = random.randint(0, 5000)  # Only fetch words from the first 5000 to avoid obscure words
+    app.puzzle_number = random.randint(0, 3000)  # Only fetch words from the first 3000 to avoid obscure words
     app.current_word = model.index_to_key[app.puzzle_number]
     app.top_1000 = model.most_similar(app.current_word, topn=1000)
     app.top_1000_words = list(map(lambda x: x[0], app.top_1000))
