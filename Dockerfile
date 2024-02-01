@@ -4,6 +4,8 @@ WORKDIR /code
 
 COPY . /code
 
+ENV TZ=Europe/Oslo
+
 RUN chmod +x /code/setup.sh
 
 RUN /code/setup.sh
