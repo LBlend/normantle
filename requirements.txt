@@ -3,3 +3,4 @@ fastapi-utils
 gensim
 uvicorn[standard]
 nltk
+typing_inspect
