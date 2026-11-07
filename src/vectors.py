@@ -66,11 +66,3 @@ class KeyedVectors:
         best = best[np.argsort(-similarities[best], kind="stable")]
 
         return [(self.index_to_key[i], float(similarities[i])) for i in best]
-
-    def closer_than(self, key1: str, key2: str) -> list[str]:
-        index = self.key_to_index[key1]
-        similarities = self._similarities(index)
-        threshold = similarities[self.key_to_index[key2]]
-        similarities[index] = -np.inf
-
-        return [self.index_to_key[i] for i in np.flatnonzero(similarities > threshold)]

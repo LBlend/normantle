@@ -105,11 +105,17 @@ def hint(hint: Hint) -> GuessResult:
     if hint.bestGuess not in model:
         raise HTTPException(status_code=404, detail="Word not found")
 
-    closer = model.closer_than(model.index_to_key[hint.puzzleNumber], hint.bestGuess)
+    words, ranks = nearest(hint.puzzleNumber)
+    if hint.bestGuess == model.index_to_key[hint.puzzleNumber]:
+        closer = []
+    else:
+        closer = words[: ranks.get(hint.bestGuess, len(words) + 1) - 1]
+
     if not closer:
         raise HTTPException(status_code=400, detail="No closer words available")
 
-    return calculate_guess(random.choice(closer), hint.puzzleNumber)
+    word, _ = random.choice(closer)
+    return calculate_guess(word, hint.puzzleNumber)
 
 
 @app.get("/surrender", response_model=GuessResult)
