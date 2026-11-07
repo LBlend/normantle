@@ -1,6 +1,5 @@
 fastapi
-fastapi-utils
 numpy
+tzdata
 uvicorn[standard]
 nltk
-typing_inspect

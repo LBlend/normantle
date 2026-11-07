@@ -1,12 +1,19 @@
-from pydantic import BaseModel
+from typing import Annotated
+
+from pydantic import BaseModel, Field, StringConstraints
+
+MAX_PUZZLE = 3000
+
+PuzzleNumber = Annotated[int, Field(ge=0, le=MAX_PUZZLE)]
+Word = Annotated[str, StringConstraints(strip_whitespace=True, to_lower=True, min_length=1, max_length=64)]
 
 
 class Guess(BaseModel):
-    word: str
-    puzzleNumber: int
+    word: Word
+    puzzleNumber: PuzzleNumber
 
 
-class GuessReult(BaseModel):
+class GuessResult(BaseModel):
     word: str
     similarity: float
     isClose: bool
@@ -15,8 +22,8 @@ class GuessReult(BaseModel):
 
 
 class Hint(BaseModel):
-    puzzleNumber: int
-    bestGuess: str
+    puzzleNumber: PuzzleNumber
+    bestGuess: Word
 
 
 class TodayInfo(BaseModel):

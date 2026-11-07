@@ -1,144 +1,138 @@
+import html
+import logging
+import os
+import random
+from contextlib import asynccontextmanager
 from datetime import datetime
-from fastapi import FastAPI, HTTPException
+from functools import lru_cache
+from typing import Annotated
+from zoneinfo import ZoneInfo
+
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
-from fastapi_utils.tasks import repeat_every
 
-from src.models import Guess, GuessReult, Hint, TodayInfo
+from src.models import MAX_PUZZLE, Guess, GuessResult, Hint, TodayInfo
 from src.vectors import KeyedVectors
-import random
+
+TIMEZONE = ZoneInfo(os.getenv("TZ", "Europe/Oslo"))
+CORS_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "*").split(",")]
+TOP_N = 1000
+
+PuzzleQuery = Annotated[int, Query(ge=0, le=MAX_PUZZLE)]
+
+logger = logging.getLogger("uvicorn.error")
+model: KeyedVectors
 
 
-print("Loading model... This might take a while!")
-model = KeyedVectors.load("model/model.bin")
-print("Model loaded!")
-
-app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"])
-app.current_day = None
-
-
-@app.on_event("startup")
-@repeat_every(seconds=30)  # This is not an optimal way of doing this but it will have to work for now
-def fetch_today_info():  # Set seed to current day in order to generate same word when running on the same day
-    current_day = datetime.now().strftime("%Y-%m-%d")
-    if current_day == app.current_day:
-        return
-
-    app.current_day = current_day
-
-    print("Fetching new todayinfo", app.current_day)
-
-    random.seed(app.current_day)
-
-    # Fetch info
-    app.puzzle_number = random.randint(0, 3000)  # Only fetch words from the first 3000 to avoid obscure words
-    app.current_word = model.index_to_key[app.puzzle_number]
-    app.top_1000 = model.most_similar(app.current_word, topn=1000)
-    app.top_1000_words = list(map(lambda x: x[0], app.top_1000))
-    app.top_1_similarity = app.top_1000[0][1]
-    app.top_10_similarity = app.top_1000[10 - 1][1]
-    app.top_1000_similarity = app.top_1000[1000 - 1][1]
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    global model
+    path = os.getenv("MODEL_PATH", "model/model.bin")
+    logger.info("Loading model from %s", path)
+    model = KeyedVectors.load(path)
+    nearest.cache_clear()
+    logger.info("Loaded %d words", len(model))
+    nearest(today_puzzle())
+    yield
 
 
-async def calculate_guess(guess: Guess) -> GuessReult:
-    """
-    Takes a given guess and calculates the similarity, correctness and closeness of the guess
-    """
+app = FastAPI(lifespan=lifespan)
+app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_methods=["GET", "POST"])
 
-    try:
-        similarity = model.similarity(guess.word, model.index_to_key[guess.puzzleNumber])
-    except KeyError:
+
+def today_puzzle() -> int:
+    day = datetime.now(TIMEZONE).strftime("%Y-%m-%d")
+    return random.Random(day).randint(0, MAX_PUZZLE)
+
+
+@lru_cache(maxsize=4)
+def nearest(puzzle: int) -> tuple[list[tuple[str, float]], dict[str, int]]:
+    words = model.most_similar(model.index_to_key[puzzle], topn=TOP_N)
+    ranks = {word: rank for rank, (word, _) in enumerate(words, start=1)}
+    return words, ranks
+
+
+def calculate_guess(word: str, puzzle: int) -> GuessResult:
+    if word not in model:
         raise HTTPException(status_code=404, detail="Word not found")
 
-    is_correct = similarity > 0.9
+    target = model.index_to_key[puzzle]
+    is_correct = word == target
+    rank = nearest(puzzle)[1].get(word)
 
-    if guess.puzzleNumber != app.puzzle_number:  # If user is still submitting for yesterday's puzzle. Still respond
-        top_1000 = model.most_similar(model.index_to_key[guess.puzzleNumber], topn=1000)
-        top_1000_words = list(map(lambda x: x[0], top_1000))
-    else:
-        top_1000_words = app.top_1000_words
-
-    is_close = True if guess.word in top_1000_words else False
-    closeness = top_1000_words.index(guess.word) + 1 if is_close else None
-
-    is_close = True if is_correct else is_close  # Set is_close to True if the guess is correct
-
-    return GuessReult(
-        word=guess.word, similarity=similarity, isClose=is_close, isCorrect=is_correct, ofThousand=closeness
+    return GuessResult(
+        word=word,
+        similarity=model.similarity(word, target),
+        isClose=is_correct or rank is not None,
+        isCorrect=is_correct,
+        ofThousand=rank,
     )
 
 
 @app.get("/today", response_model=TodayInfo)
-async def today_info() -> TodayInfo:
+def today_info() -> TodayInfo:
     """
     Metadata about today's puzzle
     """
 
+    puzzle = today_puzzle()
+    words, _ = nearest(puzzle)
+
     return TodayInfo(
-        puzzleNumber=app.puzzle_number,
-        similarity=app.top_1_similarity,
-        similarityTenth=app.top_10_similarity,
-        similarityThousandth=app.top_1000_similarity,
+        puzzleNumber=puzzle,
+        similarity=words[0][1],
+        similarityTenth=words[9][1],
+        similarityThousandth=words[-1][1],
     )
 
 
-# POST requests below because it's much more convinient to define a type than to use query parameters
-
-
-@app.post("/guess", response_model=GuessReult)
-async def guess(guess: Guess) -> GuessReult:
+@app.post("/guess", response_model=GuessResult)
+def guess(guess: Guess) -> GuessResult:
     """
     Submit a guess and get the result
     """
 
-    return await calculate_guess(guess)
+    return calculate_guess(guess.word, guess.puzzleNumber)
 
 
-@app.post("/hint", response_model=GuessReult)
-async def hint(hint: Hint) -> GuessReult:
+@app.post("/hint", response_model=GuessResult)
+def hint(hint: Hint) -> GuessResult:
     """
     Return a word that is closer to the solution than the current best guess
     """
 
+    if hint.bestGuess not in model:
+        raise HTTPException(status_code=404, detail="Word not found")
+
     closer = model.closer_than(model.index_to_key[hint.puzzleNumber], hint.bestGuess)
-    hint_word = random.choice(closer)
+    if not closer:
+        raise HTTPException(status_code=400, detail="No closer words available")
 
-    return await calculate_guess(Guess(word=hint_word, puzzleNumber=hint.puzzleNumber))
+    return calculate_guess(random.choice(closer), hint.puzzleNumber)
 
 
-@app.get("/surrender", response_model=GuessReult)
-async def surrender(puzzle: int) -> GuessReult:
+@app.get("/surrender", response_model=GuessResult)
+def surrender(puzzle: PuzzleQuery) -> GuessResult:
     """
     Return the correct word as a guess result
     """
 
-    return GuessReult(word=model.index_to_key[puzzle], similarity=1, isClose=True, isCorrect=True, ofThousand=0)
+    return GuessResult(word=model.index_to_key[puzzle], similarity=1, isClose=True, isCorrect=True, ofThousand=0)
 
 
 @app.get("/top1000", response_class=HTMLResponse)
-async def top1000(puzzle: int):
+def top1000(puzzle: PuzzleQuery) -> str:
     """
-    Return the top 1000 closes words and their similarity for a given puzzle
+    Return the top 1000 closest words and their similarity for a given puzzle
     """
 
-    if puzzle != app.puzzle_number:  # If user is still submitting for yesterday's puzzle. Still respond
-        top_1000 = model.most_similar(model.index_to_key[puzzle], topn=1000)
-    else:
-        top_1000 = app.top_1000
-
-    top_1000 = list(
-        map(
-            lambda x: f"<p>{x[0]} {model.similarity(model.index_to_key[puzzle], x[0])}</p>",
-            top_1000,
-        )
-    )
-    top_1000 = "\n".join(top_1000)
+    rows = "\n".join(f"<p>{html.escape(word)} {similarity}</p>" for word, similarity in nearest(puzzle)[0])
 
     return f"""
     <html>
         <body>
-            {top_1000}
+            {rows}
         </body>
     </html>
     """
