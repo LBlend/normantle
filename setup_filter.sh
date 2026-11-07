@@ -1,16 +1,16 @@
 #!/bin/sh
+set -eu
 
 echo "Installing Python dependencies..."
-python3 -m pip install -r requirements.txt -U
+uv sync --no-dev --group scripts
+uv run --no-dev --group scripts python -c "import nltk; nltk.download('stopwords')"
 
-if [ ! -d 'model' ]; then
-    echo "Downloading word embeddings..."
-    wget http://vectors.nlpl.eu/repository/20/93.zip
-    unzip 93.zip -d model
-    rm 93.zip
+if [ ! -f model/model.txt ]; then
+  echo "Downloading word embeddings..."
+  wget -O 93.zip https://vectors.nlpl.eu/repository/20/93.zip
+  unzip -o 93.zip -d model
+  rm 93.zip
 fi
 
-python3 -c "import nltk; nltk.download('stopwords')"
-
 echo "Filtering model..."
-python3 -m scripts.filter_model
+uv run --no-dev --group scripts python -m scripts.filter_model

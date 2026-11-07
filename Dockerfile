@@ -1,13 +1,38 @@
-FROM python:3.13
+# syntax=docker/dockerfile:1
 
-WORKDIR /code
+FROM python:3.15-slim AS model
 
-COPY . /code
+ARG MODEL_URL=https://dl.furumo.eu/93_filtered.zip
+ADD ${MODEL_URL} /tmp/model.zip
+RUN python -m zipfile -e /tmp/model.zip /model
 
-ENV TZ=Europe/Oslo
+FROM python:3.15-slim AS build
 
-RUN chmod +x /code/setup.sh
+COPY --from=ghcr.io/astral-sh/uv:0.13.7 /uv /bin/uv
 
-RUN /code/setup.sh
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=0
+
+WORKDIR /app
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-dev --no-install-project
+
+FROM python:3.15-slim
+
+RUN useradd --system --no-create-home --uid 10001 normantle
+
+WORKDIR /app
+
+ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 TZ=Europe/Oslo
+
+COPY --from=build /app/.venv /app/.venv
+COPY --from=model /model /app/model
+COPY src /app/src
+
+USER normantle
+
+EXPOSE 5000
 
 CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "5000", "--proxy-headers"]

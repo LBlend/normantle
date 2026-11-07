@@ -1,6 +1,5 @@
 model/
 
-build/
-dist/
+.venv/
 __pycache__/
-normantle.egg-info
+.ruff_cache/

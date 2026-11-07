@@ -1,0 +1,30 @@
+[project]
+name = "normantle"
+version = "1.1.0"
+description = "Semantle, på norsk!"
+readme = "README.md"
+requires-python = ">=3.15"
+dependencies = [
+    "fastapi>=0.162.0",
+    "numpy>=2.5.4",
+    "tzdata>=2026.6",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.17.4",
+]
+scripts = [
+    "nltk>=3.10.4",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "S", "SIM"]
+ignore = ["S311"]
