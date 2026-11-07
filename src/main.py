@@ -8,15 +8,17 @@ from functools import lru_cache
 from typing import Annotated
 from zoneinfo import ZoneInfo
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
 from src.models import MAX_PUZZLE, Guess, GuessResult, Hint, TodayInfo
+from src.ratelimit import RateLimiter
 from src.vectors import KeyedVectors
 
 TIMEZONE = ZoneInfo(os.getenv("TZ", "").lstrip(":") or "Europe/Oslo")
 CORS_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "*").split(",")]
+RATE_LIMIT = int(os.getenv("RATE_LIMIT_PER_MINUTE", "120"))
 TOP_N = 1000
 
 PuzzleQuery = Annotated[int, Query(ge=0, le=MAX_PUZZLE)]
@@ -37,7 +39,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, dependencies=[Depends(RateLimiter(RATE_LIMIT))])
 app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_methods=["GET", "POST"])
 
 

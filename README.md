@@ -46,11 +46,19 @@ _Det ligger også en [docker-compose](docker-compose.yml) fil i dette repoet som
 
 ### Konfigurasjon
 
-| Miljøvariabel  | Standardverdi     | Beskrivelse                                                  |
-| -------------- | ----------------- | ------------------------------------------------------------ |
-| `MODEL_PATH`   | `model/model.bin` | Sti til word2vec-modellen i binærformat                      |
-| `TZ`           | `Europe/Oslo`     | Tidssonen som bestemmer når dagens ord byttes                |
-| `CORS_ORIGINS` | `*`               | Kommaseparert liste over domener som får bruke APIet         |
+| Miljøvariabel           | Standardverdi     | Beskrivelse                                                                  |
+| ----------------------- | ----------------- | ---------------------------------------------------------------------------- |
+| `MODEL_PATH`            | `model/model.bin` | Sti til word2vec-modellen i binærformat                                      |
+| `TZ`                    | `Europe/Oslo`     | Tidssonen som bestemmer når dagens ord byttes                                |
+| `CORS_ORIGINS`          | `*`               | Kommaseparert liste over domener som får bruke APIet                         |
+| `RATE_LIMIT_PER_MINUTE` | `120`             | Maks antall forespørsler per IP-adresse per minutt. `0` skrur av begrensningen |
+| `FORWARDED_ALLOW_IPS`   | Private nettverk  | Proxyer som får sette `X-Forwarded-For`. Gjelder Docker-imaget              |
+
+Kjører du APIet bak en reverse proxy må den sende klientens IP-adresse videre, ellers deler alle spillere samme grense. For nginx:
+
+```
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+```
 
 ### Utvikling
 

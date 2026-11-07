@@ -25,7 +25,8 @@ RUN useradd --system --no-create-home --uid 10001 normantle
 
 WORKDIR /app
 
-ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 TZ=Europe/Oslo
+ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 TZ=Europe/Oslo \
+    FORWARDED_ALLOW_IPS="127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fc00::/7"
 
 COPY --from=build /app/.venv /app/.venv
 COPY --from=model /model /app/model
