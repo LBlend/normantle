@@ -4,9 +4,7 @@ from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, Field, StringConstraints
 
-MAX_PUZZLE = 3000
-
-PuzzleNumber = Annotated[int, Field(ge=0, le=MAX_PUZZLE)]
+PuzzleNumber = Annotated[int, Field(ge=0)]
 Word = Annotated[
     str,
     StringConstraints(strip_whitespace=True, to_lower=True, min_length=1, max_length=64),

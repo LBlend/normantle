@@ -2,8 +2,9 @@
 
 FROM python:3.15-slim AS model
 
-ARG MODEL_URL=https://dl.furumo.eu/93_filtered.zip
-ADD ${MODEL_URL} /tmp/model.zip
+ARG MODEL_URL=https://dl.furumo.eu/93_filtered_v2.zip
+ARG MODEL_SHA256=81ea150b00b44b88688a34d822dad84966e6a88c42944f523205fedfeb9c0677
+ADD --checksum=sha256:${MODEL_SHA256} ${MODEL_URL} /tmp/model.zip
 RUN python -m zipfile -e /tmp/model.zip /model
 
 FROM python:3.15-slim AS build
