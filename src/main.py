@@ -1,4 +1,3 @@
-import html
 import logging
 import os
 import random
@@ -10,9 +9,8 @@ from zoneinfo import ZoneInfo
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
 
-from src.models import Guess, GuessResult, Hint, TodayInfo
+from src.models import Guess, GuessResult, Hint, NearbyWord, TodayInfo
 from src.puzzle import Schedule, puzzle_number
 from src.ratelimit import RateLimiter
 from src.vectors import KeyedVectors
@@ -146,18 +144,10 @@ def surrender(puzzle: PuzzleQuery) -> GuessResult:
     return correct_guess(target(puzzle))
 
 
-@app.get("/top1000", response_class=HTMLResponse)
-def top1000(puzzle: PuzzleQuery) -> str:
+@app.get("/top1000", response_model=list[NearbyWord])
+def top1000(puzzle: PuzzleQuery) -> list[NearbyWord]:
     """
-    Return the top 1000 closest words and their similarity for a given puzzle
+    Return the 1000 closest words and their similarity for a given puzzle, closest first
     """
 
-    rows = "\n".join(f"<p>{html.escape(word)} {similarity}</p>" for word, similarity in nearest(target(puzzle))[0])
-
-    return f"""
-    <html>
-        <body>
-            {rows}
-        </body>
-    </html>
-    """
+    return [NearbyWord(word=word, similarity=similarity) for word, similarity in nearest(target(puzzle))[0]]

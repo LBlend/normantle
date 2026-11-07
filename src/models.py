@@ -30,6 +30,11 @@ class Hint(BaseModel):
     bestGuess: Word
 
 
+class NearbyWord(BaseModel):
+    word: str
+    similarity: float
+
+
 class TodayInfo(BaseModel):
     puzzleNumber: int
     similarity: float
