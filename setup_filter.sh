@@ -10,7 +10,7 @@ if [ ! -d 'model' ]; then
     rm 93.zip
 fi
 
-if [ ! -f 'model/new_model.txt' ]; then
-    echo "Filtering model..."
-    python3 scripts/filter_model.py
-fi
+python3 -c "import nltk; nltk.download('stopwords')"
+
+echo "Filtering model..."
+python3 -m scripts.filter_model

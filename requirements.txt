@@ -1,6 +1,6 @@
 fastapi
 fastapi-utils
-gensim
+numpy
 uvicorn[standard]
 nltk
 typing_inspect

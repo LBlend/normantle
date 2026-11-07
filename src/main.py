@@ -3,16 +3,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi_utils.tasks import repeat_every
-import gensim
+
 from src.models import Guess, GuessReult, Hint, TodayInfo
+from src.vectors import KeyedVectors
 import random
 
 
 print("Loading model... This might take a while!")
-model = gensim.models.KeyedVectors.load_word2vec_format("model/model.bin", binary=True, unicode_errors="replace")
+model = KeyedVectors.load("model/model.bin")
 print("Model loaded!")
-
-model.sort_by_descending_frequency()  # Just in case :)
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"])
