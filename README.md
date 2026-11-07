@@ -44,7 +44,7 @@ Vi anbefaler at du bruker kommandoen gitt ovenfor. Du står derimot fritt til å
 
 </details>
 
-_Det ligger også en [docker-compose](docker-compose.yml) fil i dette repoet som vil sette opp både backend og frontend gjennom Docker. Merk deg derimot at bruk av denne metoden kan sette restriksjoner på konfigurasjonen din. Se frontendrepoet for mer info._
+_Det ligger også en [docker-compose](docker-compose.yml) fil i dette repoet som vil sette opp både backend og frontend gjennom Docker. Sett `PUZZLE_SECRET` som beskrevet over, og `API_ROOT` til adressen nettleseren skal bruke for å nå backenden. Standard er `http://localhost:5000`._
 
 ### Konfigurasjon
 
