@@ -26,8 +26,8 @@ Vi anbefaler at du bruker kommandoen gitt ovenfor. Du står derimot fritt til å
 
 0. Last ned repoet og installer avhengigheter
 
-- Python 3.10+
-- Pip
+- [uv](https://docs.astral.sh/uv/) (installerer Python 3.15 automatisk)
+- wget og unzip
 
 1. Kjør installasjonsskriptet
 
@@ -35,16 +35,32 @@ Vi anbefaler at du bruker kommandoen gitt ovenfor. Du står derimot fritt til å
    sh setup.sh
    ```
 
-_Merk deg at dette skriptet antar at PATH til python er satt til `python3`. Hvis dette ikke er tilfellet for deg, må du huske å endre skriptet eller PATHen din._
-
 2. Kjør APIet
    ```
-   uvicorn src.main:app --host 0.0.0.0 --port 5000 --proxy-headers
+   uv run --no-dev uvicorn src.main:app --host 0.0.0.0 --port 5000 --proxy-headers
    ```
 
 </details>
 
 _Det ligger også en [docker-compose](docker-compose.yml) fil i dette repoet som vil sette opp både backend og frontend gjennom Docker. Merk deg derimot at bruk av denne metoden kan sette restriksjoner på konfigurasjonen din. Se frontendrepoet for mer info._
+
+### Konfigurasjon
+
+| Miljøvariabel  | Standardverdi     | Beskrivelse                                                  |
+| -------------- | ----------------- | ------------------------------------------------------------ |
+| `MODEL_PATH`   | `model/model.bin` | Sti til word2vec-modellen i binærformat                      |
+| `TZ`           | `Europe/Oslo`     | Tidssonen som bestemmer når dagens ord byttes                |
+| `CORS_ORIGINS` | `*`               | Kommaseparert liste over domener som får bruke APIet         |
+
+### Utvikling
+
+```
+uv sync
+uv run ruff check
+uv run ruff format
+```
+
+For å lage den filtrerte modellen selv kan du kjøre `sh setup_filter.sh`.
 
 ## Et notat om valg av word2vec-modell og filtrering
 
