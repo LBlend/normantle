@@ -4,6 +4,7 @@ import random
 from contextlib import asynccontextmanager
 from datetime import datetime
 from functools import lru_cache
+from pathlib import Path
 from typing import Annotated
 from zoneinfo import ZoneInfo
 
@@ -39,7 +40,8 @@ async def lifespan(_: FastAPI):
     secret = os.getenv("PUZZLE_SECRET", "")
     if not secret:
         logger.warning("PUZZLE_SECRET is not set, so anyone can work out future answers from the source code")
-    schedule = Schedule(model.index_to_key, secret)
+    nouns = Path(path).with_name("nouns.txt").read_text(encoding="utf-8").split()
+    schedule = Schedule([noun for noun in nouns if noun in model], secret)
 
     nearest(target(today_puzzle()))
     yield

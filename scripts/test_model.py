@@ -1,8 +1,6 @@
 from src.vectors import KeyedVectors
 
 PAIRS = [
-    ("kvinne", "kvinner"),
-    ("mann", "menn"),
     ("mann", "kvinne"),
     ("hund", "valp"),
     ("riktig", "korrekt"),

@@ -50,7 +50,7 @@ _Det ligger også en [docker-compose](docker-compose.yml) fil i dette repoet som
 
 | Miljøvariabel           | Standardverdi     | Beskrivelse                                                                  |
 | ----------------------- | ----------------- | ---------------------------------------------------------------------------- |
-| `MODEL_PATH`            | `model/model.bin` | Sti til word2vec-modellen i binærformat                                      |
+| `MODEL_PATH`            | `model/model.bin` | Sti til word2vec-modellen i binærformat. `nouns.txt` må ligge ved siden av   |
 | `TZ`                    | `Europe/Oslo`     | Tidssonen som bestemmer når dagens ord byttes                                |
 | `CORS_ORIGINS`          | `*`               | Kommaseparert liste over domener som får bruke APIet                         |
 | `PUZZLE_SECRET`         |                   | Hemmelig nøkkel som bestemmer rekkefølgen på ordene. Ikke bytt den etter at spillet er i bruk |
@@ -81,12 +81,16 @@ Dette prosjektet tar i modell #93 fra LTG Oslo sitt [word embeddings repository]
 
 ### Filtrering
 
-Modellene inneholder mange ord som ikke passer seg til spillet. Dette er gjerne stopwords eller andre ord som forkortelser osv. For å "løse" dette har jeg valgt å filtrere bort alle ord som er stoppord ifølge NLTK-pakken samt ord som begynner med stor bokstav, inneholder andre tegn enn bokstaver eller er kortere enn tre bokstaver lange.
+Modellen inneholder mange ord som ikke passer seg til spillet, som feilstavinger, nynorsk, forkortelser og fyllord. Derfor beholdes bare ord som står i [Norsk ordbank](https://www.nb.no/sprakbanken/ressurskatalog/oai-nb-no-sbr-5/) for bokmål som substantiv, verb, adjektiv eller rene adverb. Ord som bare er konjunksjoner, preposisjoner, pronomen, determinativer eller interjeksjoner fjernes, sammen med stoppord ifølge NLTK, ord med store bokstaver eller andre tegn enn bokstaver, og ord som er kortere enn tre bokstaver.
+
+Filtreringen lager også `nouns.txt`, en liste over alle ord som bare er substantiv, sortert fra vanligst til minst vanlig. Den må ligge i samme mappe som modellen.
 
 ### Valg av dagens ord
 
-Dagens ord trekkes fra ord nummer 150 til 3150 i modellen, som er sortert fra vanligst til minst vanlig. De 150 vanligste ordene hoppes over fordi de stort sett er fyllord som "mye", "måtte" og "ifølge". Ordene stokkes med `PUZZLE_SECRET` og deles ut ett om dagen, så det går over åtte år før et ord kommer igjen, og ingen kan regne ut fremtidige ord uten nøkkelen.
+Dagens ord trekkes fra substantiv nummer 500 til 3500 i `nouns.txt`. De vanligste substantivene hoppes over fordi de blir for lette. Ordene stokkes med `PUZZLE_SECRET` og deles ut ett om dagen, så det går over åtte år før et ord kommer igjen, og ingen kan regne ut fremtidige ord uten nøkkelen. Utvalget styres av `SKIP_MOST_COMMON` og `WORDS` i [src/puzzle.py](src/puzzle.py). Endrer du dem, får alle dager nye ord.
 
 ## Takk
 
 Takk til [LtgOslo](https://www.mn.uio.no/ifi/english/research/groups/ltg/) som har publisert word2vec-modellen. Uten dem ville ikke dette prosjektet vært mulig.
+
+Ordklassene kommer fra [Norsk ordbank](https://www.nb.no/sprakbanken/ressurskatalog/oai-nb-no-sbr-5/), utgitt av Språkbanken ved Nasjonalbiblioteket under lisensen [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
