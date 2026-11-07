@@ -69,18 +69,24 @@ def nearest(word: str) -> tuple[list[tuple[str, float]], dict[str, int]]:
     return words, ranks
 
 
+def correct_guess(answer: str) -> GuessResult:
+    return GuessResult(word=answer, similarity=1, isClose=True, isCorrect=True, ofThousand=0)
+
+
 def calculate_guess(word: str, answer: str) -> GuessResult:
     if word not in model:
         raise HTTPException(status_code=404, detail="Word not found")
 
-    is_correct = word == answer
+    if word == answer:
+        return correct_guess(answer)
+
     rank = nearest(answer)[1].get(word)
 
     return GuessResult(
         word=word,
         similarity=model.similarity(word, answer),
-        isClose=is_correct or rank is not None,
-        isCorrect=is_correct,
+        isClose=rank is not None,
+        isCorrect=False,
         ofThousand=rank,
     )
 
@@ -137,7 +143,7 @@ def surrender(puzzle: PuzzleQuery) -> GuessResult:
     Return the correct word as a guess result
     """
 
-    return GuessResult(word=target(puzzle), similarity=1, isClose=True, isCorrect=True, ofThousand=0)
+    return correct_guess(target(puzzle))
 
 
 @app.get("/top1000", response_class=HTMLResponse)
