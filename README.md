@@ -70,7 +70,7 @@ Dette prosjektet tar i modell #93 fra LTG Oslo sitt [word embeddings repository]
 
 ### Filtrering
 
-Modellene inneholder mange ord som ikke passer seg til spillet. Dette er gjerne stopwords eller andre ord som forkortelser osv. For å "løse" dette har jeg valgt å filtrere bort alle ord som er stoppord ifølge NLTK-pakken samt ord som inneholder store bokstaver eller er kortere enn tre bokstaver lange.
+Modellene inneholder mange ord som ikke passer seg til spillet. Dette er gjerne stopwords eller andre ord som forkortelser osv. For å "løse" dette har jeg valgt å filtrere bort alle ord som er stoppord ifølge NLTK-pakken samt ord som begynner med stor bokstav, inneholder andre tegn enn bokstaver eller er kortere enn tre bokstaver lange.
 
 ## Takk
 

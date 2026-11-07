@@ -15,7 +15,7 @@ from fastapi.responses import HTMLResponse
 from src.models import MAX_PUZZLE, Guess, GuessResult, Hint, TodayInfo
 from src.vectors import KeyedVectors
 
-TIMEZONE = ZoneInfo(os.getenv("TZ", "Europe/Oslo"))
+TIMEZONE = ZoneInfo(os.getenv("TZ", "").lstrip(":") or "Europe/Oslo")
 CORS_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "*").split(",")]
 TOP_N = 1000
 
